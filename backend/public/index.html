@@ -86,9 +86,36 @@
 
   <pre id="output"></pre>
 
-  <button onclick="logout()">Logout</button>
-</div>
+  <h3>Add Team Member</h3>
 
+<input id="projectId" placeholder="Project ID"><br>
+<input id="userId" placeholder="User ID"><br>
+
+<button onclick="addMember()">Add Member</button>
+
+  <button onclick="logout()">Logout</button>
+
+<h3>Create Task</h3>
+
+<input id="taskTitle" placeholder="Task Title"><br>
+<input id="taskDesc" placeholder="Description"><br>
+<input id="assignUser" placeholder="Assign User ID"><br>
+<input id="projectTaskId" placeholder="Project ID"><br>
+
+<button onclick="createTask()">Create Task</button>
+
+<hr>
+
+<h3>Update Task Status</h3>
+
+<input id="taskId" placeholder="Task ID"><br>
+
+<select id="status">
+  <option value="Pending">Pending</option>
+  <option value="Completed">Completed</option>
+</select>
+<button onclick="updateStatus()">Update Status</button>
+</div>
 <script>
 let token = "";
 
@@ -178,6 +205,54 @@ async function getDashboard() {
 
   const data = await res.json();
   document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+}
+async function addMember() {
+  await fetch("/api/projects/add-member", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({
+      projectId: document.getElementById("projectId").value,
+      userId: document.getElementById("userId").value
+    })
+  });
+
+  alert("Member added!");
+}
+async function createTask() {
+  await fetch("/api/tasks/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({
+      title: document.getElementById("taskTitle").value,
+      description: document.getElementById("taskDesc").value,
+      assignedTo: document.getElementById("assignUser").value,
+      project: document.getElementById("projectTaskId").value,
+      dueDate: new Date()
+    })
+  });
+
+  alert("Task created!");
+}
+
+async function updateStatus() {
+  await fetch("/api/tasks/update/" + document.getElementById("taskId").value, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({
+      status: document.getElementById("status").value
+    })
+  });
+
+  alert("Status updated!");
 }
 
 // Logout
