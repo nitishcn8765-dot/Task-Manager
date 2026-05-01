@@ -12,6 +12,22 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("DB Connected"))
   .catch(err => console.log(err));
 
+  app.get("/", (req, res) => {
+  res.send(`
+    <h1>🚀 Task Manager API</h1>
+    <p>Backend is running successfully</p>
+    <h3>Available APIs:</h3>
+    <ul>
+      <li>POST /api/auth/signup</li>
+      <li>POST /api/auth/login</li>
+      <li>POST /api/projects/create</li>
+      <li>POST /api/tasks/create</li>
+      <li>GET /api/tasks/dashboard</li>
+    </ul>
+    <p>Use Postman or API tool to test endpoints.</p>
+  `);
+});
+
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/projects", require("./routes/projectRoutes"));
 try {
