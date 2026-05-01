@@ -169,6 +169,8 @@ async function signup() {
 }
 
 // LOGIN
+let userRole = "";
+
 async function login() {
   const res = await fetch("/api/auth/login", {
     method: "POST",
@@ -182,8 +184,18 @@ async function login() {
   const data = await res.json();
   token = data.token;
 
+  // 🔥 Decode token to get role
+  const payload = JSON.parse(atob(token.split(".")[1]));
+  userRole = payload.role;
+
   alert("Login successful!");
   showDashboard();
+
+  // 🔥 Hide admin features if not admin
+  if (userRole !== "Admin") {
+    document.getElementById("teamSection").style.display = "none";
+    document.getElementById("taskSection").style.display = "none";
+  }
 }
 
 // CREATE PROJECT
