@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Task Manager</title>
+</head>
+<body>
+  <h1>🚀 Task Manager App</h1>
+
+  <h2>Login</h2>
+  <input id="email" placeholder="Email"><br>
+  <input id="password" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+
+  <h2>Create Project</h2>
+  <input id="projectName" placeholder="Project Name"><br>
+  <button onclick="createProject()">Create</button>
+
+  <h2>Dashboard</h2>
+  <button onclick="getDashboard()">Load Dashboard</button>
+  <pre id="output"></pre>
+
+<script>
+let token = "";
+
+async function login() {
+  const res = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      email: document.getElementById("email").value,
+      password: document.getElementById("password").value
+    })
+  });
+
+  const data = await res.json();
+  token = data.token;
+  alert("Logged in!");
+}
+
+async function createProject() {
+  await fetch("/api/projects/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({
+      name: document.getElementById("projectName").value
+    })
+  });
+
+  alert("Project created!");
+}
+
+async function getDashboard() {
+  const res = await fetch("/api/tasks/dashboard", {
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  const data = await res.json();
+  document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+}
+</script>
+
+</body>
+</html>
