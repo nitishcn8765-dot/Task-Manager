@@ -83,6 +83,12 @@
 </div>
 
 <!-- DASHBOARD -->
+ <div id="memberSection" class="hidden">
+  <h3>📁 Select Project</h3>
+
+  <input id="memberProjectId" placeholder="Enter Project ID"><br>
+  <button onclick="loadMemberDashboard()">Load My Tasks</button>
+</div>
 <div class="card hidden" id="dashboardPage">
 
   <h2>📁 Create Project</h2>
@@ -184,17 +190,20 @@ async function login() {
   const data = await res.json();
   token = data.token;
 
-  // 🔥 Decode token to get role
   const payload = JSON.parse(atob(token.split(".")[1]));
   userRole = payload.role;
 
   alert("Login successful!");
   showDashboard();
 
-  // 🔥 Hide admin features if not admin
   if (userRole !== "Admin") {
+    // hide admin stuff
     document.getElementById("teamSection").style.display = "none";
     document.getElementById("taskSection").style.display = "none";
+    document.getElementById("projectName").style.display = "none";
+
+    // show member section
+    document.getElementById("memberSection").classList.remove("hidden");
   }
 }
 
@@ -272,6 +281,17 @@ async function updateStatus() {
   });
 
   alert("Status updated!");
+}
+async function loadMemberDashboard() {
+  const res = await fetch("/api/tasks/dashboard", {
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  const data = await res.json();
+
+  output.innerText = JSON.stringify(data, null, 2);
 }
 
 // DASHBOARD
