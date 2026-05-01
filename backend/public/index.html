@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Task Manager</title>
+
   <style>
     body {
       font-family: Arial;
@@ -9,14 +10,16 @@
       text-align: center;
       margin-top: 50px;
     }
+
     .card {
       background: white;
       padding: 20px;
       margin: auto;
-      width: 300px;
+      width: 320px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+
     input, select, button {
       width: 90%;
       padding: 10px;
@@ -24,15 +27,18 @@
       border-radius: 5px;
       border: 1px solid #ccc;
     }
+
     button {
       background: #007bff;
       color: white;
       border: none;
       cursor: pointer;
     }
+
     button:hover {
       background: #0056b3;
     }
+
     .hidden {
       display: none;
     }
@@ -41,19 +47,20 @@
 
 <body>
 
-<!-- Landing Page -->
+<!-- HOME -->
 <div class="card" id="home">
   <h2>🚀 Task Manager</h2>
   <button onclick="showLogin()">Login</button>
   <button onclick="showSignup()">Signup</button>
 </div>
 
-<!-- Signup -->
+<!-- SIGNUP -->
 <div class="card hidden" id="signupPage">
   <h2>Signup</h2>
-  <input id="name" placeholder="Name"><br>
-  <input id="email_signup" placeholder="Email"><br>
-  <input id="password_signup" placeholder="Password"><br>
+
+  <input id="name" placeholder="Name">
+  <input id="email_signup" placeholder="Email">
+  <input id="password_signup" placeholder="Password">
 
   <select id="role">
     <option value="Member">Member</option>
@@ -64,62 +71,62 @@
   <button onclick="goHome()">Back</button>
 </div>
 
-<!-- Login -->
+<!-- LOGIN -->
 <div class="card hidden" id="loginPage">
   <h2>Login</h2>
-  <input id="email" placeholder="Email"><br>
-  <input id="password" placeholder="Password"><br>
+
+  <input id="email" placeholder="Email">
+  <input id="password" placeholder="Password">
 
   <button onclick="login()">Login</button>
   <button onclick="goHome()">Back</button>
 </div>
 
-<!-- Dashboard -->
+<!-- DASHBOARD -->
 <div class="card hidden" id="dashboardPage">
-  <h2>Dashboard</h2>
 
-  <input id="projectName" placeholder="Project Name"><br>
+  <h2>📁 Create Project</h2>
+  <input id="projectName" placeholder="Project Name">
   <button onclick="createProject()">Create Project</button>
 
-  <br><br>
+  <div id="teamSection" class="hidden">
+    <h3>👥 Add Team Member</h3>
+    <input id="memberUserId" placeholder="User ID">
+    <button onclick="addMember()">Add Member</button>
+  </div>
+
+  <div id="taskSection" class="hidden">
+    <h3>📝 Create Task</h3>
+    <input id="taskTitle" placeholder="Task Title">
+    <input id="taskDesc" placeholder="Description">
+    <input id="assignUserId" placeholder="Assign User ID">
+    <button onclick="createTask()">Create Task</button>
+
+    <h3>🔄 Update Task Status</h3>
+    <input id="taskId" placeholder="Task ID">
+
+    <select id="status">
+      <option value="Pending">Pending</option>
+      <option value="Completed">Completed</option>
+    </select>
+
+    <button onclick="updateStatus()">Update Status</button>
+  </div>
+
+  <h3>📊 Dashboard</h3>
   <button onclick="getDashboard()">Load Stats</button>
 
   <pre id="output"></pre>
 
-  <h3>Add Team Member</h3>
-
-<input id="projectId" placeholder="Project ID"><br>
-<input id="userId" placeholder="User ID"><br>
-
-<button onclick="addMember()">Add Member</button>
-
   <button onclick="logout()">Logout</button>
 
-<h3>Create Task</h3>
-
-<input id="taskTitle" placeholder="Task Title"><br>
-<input id="taskDesc" placeholder="Description"><br>
-<input id="assignUser" placeholder="Assign User ID"><br>
-<input id="projectTaskId" placeholder="Project ID"><br>
-
-<button onclick="createTask()">Create Task</button>
-
-<hr>
-
-<h3>Update Task Status</h3>
-
-<input id="taskId" placeholder="Task ID"><br>
-
-<select id="status">
-  <option value="Pending">Pending</option>
-  <option value="Completed">Completed</option>
-</select>
-<button onclick="updateStatus()">Update Status</button>
 </div>
+
 <script>
 let token = "";
+let projectId = "";
 
-// Navigation
+// NAVIGATION
 function showLogin() {
   hideAll();
   document.getElementById("loginPage").classList.remove("hidden");
@@ -144,16 +151,16 @@ function hideAll() {
   document.querySelectorAll(".card").forEach(c => c.classList.add("hidden"));
 }
 
-// Signup
+// SIGNUP
 async function signup() {
   await fetch("/api/auth/signup", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
-      name: document.getElementById("name").value,
-      email: document.getElementById("email_signup").value,
-      password: document.getElementById("password_signup").value,
-      role: document.getElementById("role").value
+      name: name.value,
+      email: email_signup.value,
+      password: password_signup.value,
+      role: role.value
     })
   });
 
@@ -161,14 +168,14 @@ async function signup() {
   showLogin();
 }
 
-// Login
+// LOGIN
 async function login() {
   const res = await fetch("/api/auth/login", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
-      email: document.getElementById("email").value,
-      password: document.getElementById("password").value
+      email: email.value,
+      password: password.value
     })
   });
 
@@ -179,33 +186,28 @@ async function login() {
   showDashboard();
 }
 
-// Create Project
+// CREATE PROJECT
 async function createProject() {
-  await fetch("/api/projects/create", {
+  const res = await fetch("/api/projects/create", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer " + token
     },
     body: JSON.stringify({
-      name: document.getElementById("projectName").value
+      name: projectName.value
     })
   });
 
-  alert("Project created!");
-}
-
-// Dashboard
-async function getDashboard() {
-  const res = await fetch("/api/tasks/dashboard", {
-    headers: {
-      "Authorization": "Bearer " + token
-    }
-  });
-
   const data = await res.json();
-  document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+  projectId = data._id;
+
+  alert("Project created!");
+
+  document.getElementById("teamSection").classList.remove("hidden");
 }
+
+// ADD MEMBER
 async function addMember() {
   await fetch("/api/projects/add-member", {
     method: "POST",
@@ -214,13 +216,17 @@ async function addMember() {
       "Authorization": "Bearer " + token
     },
     body: JSON.stringify({
-      projectId: document.getElementById("projectId").value,
-      userId: document.getElementById("userId").value
+      projectId,
+      userId: memberUserId.value
     })
   });
 
   alert("Member added!");
+
+  document.getElementById("taskSection").classList.remove("hidden");
 }
+
+// CREATE TASK
 async function createTask() {
   await fetch("/api/tasks/create", {
     method: "POST",
@@ -229,10 +235,10 @@ async function createTask() {
       "Authorization": "Bearer " + token
     },
     body: JSON.stringify({
-      title: document.getElementById("taskTitle").value,
-      description: document.getElementById("taskDesc").value,
-      assignedTo: document.getElementById("assignUser").value,
-      project: document.getElementById("projectTaskId").value,
+      title: taskTitle.value,
+      description: taskDesc.value,
+      assignedTo: assignUserId.value,
+      project: projectId,
       dueDate: new Date()
     })
   });
@@ -240,24 +246,38 @@ async function createTask() {
   alert("Task created!");
 }
 
+// UPDATE STATUS
 async function updateStatus() {
-  await fetch("/api/tasks/update/" + document.getElementById("taskId").value, {
+  await fetch("/api/tasks/update/" + taskId.value, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer " + token
     },
     body: JSON.stringify({
-      status: document.getElementById("status").value
+      status: status.value
     })
   });
 
   alert("Status updated!");
 }
 
-// Logout
+// DASHBOARD
+async function getDashboard() {
+  const res = await fetch("/api/tasks/dashboard", {
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  const data = await res.json();
+  output.innerText = JSON.stringify(data, null, 2);
+}
+
+// LOGOUT
 function logout() {
   token = "";
+  projectId = "";
   goHome();
 }
 </script>
